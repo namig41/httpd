@@ -18,20 +18,23 @@ typedef struct s_header
 	char*		value;
 }				t_header;
 
-typedef struct s_request
+typedef struct  s_info
 {
 	char*		method;
 	char*		version;
 	char*		path;
+}               t_info;
+
+typedef struct s_request
+{
+	t_info*     info;
 	t_header**	headers;
 	size_t		size_header;
 }				t_request;
 
 typedef struct	s_response
 {
-	char*		method;
-	char		path[2048];
-	t_http_code code;
+	t_info      info;
 	t_header**	headers;
 	size_t		size_header;
 	char*		content;
