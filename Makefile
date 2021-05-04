@@ -1,12 +1,13 @@
 FILE_HTTPD 	= \
 			main \
 			http \
-			lexer \
 			net \
-			parser \
 			request \
 			response \
-			token
+			header \
+			status \
+			page \
+			utilities \
 
 DIR_SRC			= ./src/
 DIR_INC			= ./include/

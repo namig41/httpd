@@ -2,11 +2,6 @@
 
 #include "net.h"
 
-static int isdigit(char c)
-{
-	return '0' <= c && c <= '9';
-}
-
 static int8_t net_parse_address(char* address, char* ipv4, char* port) 
 {
 	size_t i = 0;

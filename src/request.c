@@ -1,72 +1,43 @@
 #include "message.h"
 
-char** str_split(char* a_str, const char a_delim)
+void request_print(t_request* request)
 {
-	char** result    = 0;
-	size_t count     = 0;
-	char* tmp        = a_str;
-	char* last_comma = 0;
-	char delim[2];
-	delim[0] = a_delim;
-	delim[1] = 0;
-
-	while (*tmp)
-	{
-		if (a_delim == *tmp)
-		{
-			count++;
-			last_comma = tmp;
-		}
-		tmp++;
-	}
-	count += last_comma < (a_str + strlen(a_str) - 1);
-	count++;
-	result = malloc(sizeof(char*) * count);
-	if (result)
-	{
-		size_t idx  = 0;
-		char* token = strtok(a_str, delim);
-
-		while (token)
-		{
-			*(result + idx++) = strdup(token);
-			token = strtok(0, delim);
-		}
-		*(result + idx) = 0;
-	}
-
-	return result;
-}
-
-t_header* header_parse(char* line)
-{
-	t_header* header = (t_header *) calloc(1, sizeof(t_header));
-	char** spl = str_split(line, ':');
-	header->key = spl[0];
-	header->value = spl[1];
-	return header;
-}
-
-t_info* info_parse(char* line)
-{
-	t_info* header = (t_info *) calloc(1, sizeof(t_info));
-	char** spl = str_split(line, ':');
-	header->key = spl[0];
-	header->value = spl[1];
-	return header;
+	status_print(request->status);
+	header_print_all(request->headers, request->header_size);
 }
 
 t_request* request_parse(char* src)
 {
-	char** spl = str_split(src, '\n');
-	int i = 0;
-
+	char** s_src = strsplit(src, "\n\r");
+	
 	t_request* request = (t_request *)calloc(1, sizeof(t_request));
 
-	request->method =
-	request->path =
-	request->version =
+	request->status = status_parse(s_src[0]);
 
+	for (int i = 1; s_src[i]; i++)
+	{
+		t_header* header = header_parse(s_src[i]);
+		request_add_header(request, header);
+	}
 	return request;
 }
 
+void request_free(t_request* request)
+{
+	header_free_all(request->headers, request->header_size);
+	status_free(request->status);
+	free(request);
+}
+
+void request_add_header(t_request* request, t_header* header)
+{
+	request->header_size += 1;
+	if (request->header_size == 0) {
+		request->headers = (t_header **)calloc(request->header_size, 
+				sizeof(t_header *));
+	} else {
+		request->headers = (t_header **)realloc(request->headers,
+				request->header_size * sizeof(t_header *));
+	}
+	request->headers[request->header_size - 1] = header;
+}
