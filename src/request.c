@@ -14,7 +14,7 @@ t_request* request_parse(char* src)
 
 	request->status = status_parse(s_src[0]);
 
-	for (int i = 1; s_src[i]; i++)
+	for (size_t i = 1; s_src[i]; i++)
 	{
 		t_header* header = header_parse(s_src[i]);
 		request_add_header(request, header);

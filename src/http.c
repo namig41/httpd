@@ -35,7 +35,7 @@ _Noreturn void http_listen(t_http* http)
 {
 	int listener = net_listen(http->host);
 	if (listener < 0) {
-		printf("Listener error");
+		perror("Listener error");
 		exit(1);
 	}
 	while (1) {
