@@ -7,7 +7,14 @@
 #include <string.h>  
 #include <dirent.h>
 #include <errno.h>
-#include <ctype.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/wait.h>
+#include <resolv.h>
 
 #include "net.h"
 #include "message.h"

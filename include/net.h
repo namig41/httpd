@@ -14,6 +14,7 @@
 #include <stdlib.h> 
 #include <errno.h>
 #include <string.h>
+#include <ctype.h>
 
 typedef enum	e_error
 {
@@ -28,7 +29,7 @@ typedef enum	e_error
 
 int net_listen(char* addr);
 int net_accept(int listener);
-int net_connect(char* addr);
+int net_connect(const char* addr);
 int net_close(int conn);
 int net_send(int conn, char* buff, size_t size);
 int net_recv(int conn, char* buff, size_t size);

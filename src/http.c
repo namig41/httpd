@@ -23,6 +23,14 @@ void http_free(t_http* http)
 	free(http);
 }
 
+static void signal_child(int sig)
+{
+	pid_t pid;
+	int stat;
+	while ((pid = waitpid(-1, &stat, WNOHANG)) > 0) ;
+	return;
+}
+
 _Noreturn void http_listen(t_http* http)
 {
 	int listener = net_listen(http->host);
@@ -31,28 +39,33 @@ _Noreturn void http_listen(t_http* http)
 		exit(1);
 	}
 	while (1) {
+		signal(SIGCHLD, signal_child);
 		int conn = net_accept(listener);
-		if (conn < 0) {
-			continue;
-		}
-		t_request* request;
-		while (1) {
-			char buf[BUF_SIZE] = {0};
-			int n = net_recv(conn, buf, BUF_SIZE);
-			request = request_parse(buf);
-			if (n != BUF_SIZE) {
-				break;
+		if (conn > 0) {
+			pid_t pid = fork();
+			if (pid == 0) {
+				t_request* request;
+				while (1) {
+					char buf[BUF_SIZE] = {0};
+					int n = net_recv(conn, buf, BUF_SIZE);
+					request = request_parse(buf);
+					if (n != BUF_SIZE) {
+						break;
+					}
+				}
+				t_page* page = http_search_page(http, request->status->path);
+				t_response* response = response_init(page);
+				char* s_response = response_to_string(response);
+				net_send(conn, s_response, strlen(s_response));
+				response_free(response);
+				request_free(request);
+				free(s_response);
+				net_close(conn);
+				exit(0);
+			} else if (pid > 0) {
+				net_close(conn);
 			}
-		}
-		request_print(request);
-		t_page* page = http_search_page(http, request->status->path);
-		t_response* response = response_init(page);
-		char* s_response = response_to_string(response);
-		net_send(conn, s_response, strlen(s_response));
-		response_free(response);
-		request_free(request);
-		free(s_response);
-		net_close(conn);
+		} 
 	}
 }
 
@@ -89,7 +102,7 @@ void  http_read_dir_r(t_http* http, char *path)
 			continue;
 		}
 		else if (ep->d_type == DT_DIR) {
-			sprintf(newdir, "%s/%s", path, ep->d_name);
+			sprintf(newdir, "%s%s/", path, ep->d_name);
 			http_read_dir_r(http, newdir);
 		} else {
 			sprintf(file_path, "%s%s", path, ep->d_name);

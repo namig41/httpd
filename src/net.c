@@ -2,36 +2,24 @@
 
 #include "net.h"
 
-static int8_t net_parse_address(char* address, char* ipv4, char* port) 
+static int8_t net_parse_address(const char* address, char* ipv4, char* port)
 {
-	size_t i = 0;
+	size_t i, j;
 
-	while (address[i] != ':') {
-		if (address[i] == '\0') {
+	for (i = 0; address[i] != ':'; i++) {
+		if (address[i] == '\0' || i >= 15 ||
+			(!isdigit(address[i]) && address[i] != '.')) {
 			return 1;
 		}
-		if (i >= 15) {
-			return 2;
-		}
-		if (isdigit(address[i]) || address[i] == '.') {
-			ipv4[i] = address[i];
-		} else {
-			return 3;
-		}
-		i++;
+		ipv4[i] = address[i];
 	}
+
 	ipv4[i++] = '\0';
-	size_t j = 0;
-	while (address[i]) {
-		if (j >= 5) {
-			return 4;
-		}	
-		if (isdigit(address[i])) {
-			port[j] = address[i];
-		} else {
-			return 3;
+	for (j = 0; address[i]; i++, j++) {
+		if (!isdigit(address[i])) {
+			return 1;
 		}
-		i++, j++;
+		port[j] = address[i];
 	}
 	port[j] = '\0';
 	return 0;
@@ -76,7 +64,7 @@ int net_accept(int listener)
 	return accept(listener, NULL, NULL);
 }
 
-int net_connect(char* addr)
+int net_connect(const char* addr)
 {
 #ifdef __WIN32
 	WSDATA wsa;
@@ -86,6 +74,9 @@ int net_connect(char* addr)
 #endif
 	char ipv4[16];
 	char port[6];
+	if (net_parse_address(addr, ipv4, port) != 0) {
+		return PARSE_ERR;
+	}
 	int conn = socket(AF_INET, SOCK_STREAM, 0);
 	if (conn < 0) {
 		return SOCKET_ERR;
@@ -94,9 +85,10 @@ int net_connect(char* addr)
 	address.sin_family = AF_INET;
 	address.sin_port = htons(atoi(port));
 	address.sin_addr.s_addr = inet_addr(ipv4);
-	if (bind(conn, (struct sockaddr *)&address, sizeof(addr)) != 0) {
+	if (bind(conn, (struct sockaddr *)&address, sizeof(address)) != 0) {
 		return CONNECT_ERR;
 	}
+	return conn;
 }
 
 int net_close(int conn)
