@@ -8,4 +8,4 @@ Using ``make`` will create the ``httpd`` executable.
 
 ## Usage
 
-./httpd <dir> <address:port>
+```./httpd  <dir> <address:port>```
