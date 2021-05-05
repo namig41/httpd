@@ -4,7 +4,7 @@ void response_set_content(t_response* response, char* content)
 {
 	response->content = content;
 	char num[16];
-	sprintf(num, "%d", strlen(content));
+	sprintf(num, "%d", (int)strlen(content));
 	t_header* header = header_init("Content-Length", num);
 	response_add_header(response, header);
 }
@@ -32,6 +32,7 @@ t_response* response_init(t_page* page)
 		response_set_content(response, content);
 	} else {
 		response->code = NOT_FOUND;
+		response_set_content(response, strdup("Not Found\n\r"));
 	}
 	response_init_status(response);
 	return response;
@@ -42,13 +43,16 @@ char* response_to_string(t_response* response)
 	char* s_response = (char *)calloc(1, sizeof(char));
 	char* s_status = response->status;
 	s_response = (char *)realloc(s_response,
-			(strlen(s_response) + strlen(s_status)) * sizeof(char));
+			(strlen(s_response) + strlen(s_status) + 1) * sizeof(char));
+	strcat(s_response, s_status);
 	char* s_headers = header_to_string_all(response->headers, response->header_size);
 	s_response = (char *)realloc(s_response,
-			(strlen(s_response) + strlen(s_headers)) * sizeof(char));
+			(strlen(s_response) + strlen(s_headers) + 1) * sizeof(char));
+	strcat(s_response, s_headers);
 	char* s_content = response->content;
 	s_response = (char *)realloc(s_response,
-			(strlen(s_response) + strlen(s_content)) * sizeof(char));
+			(strlen(s_response) + strlen(s_content) + 1) * sizeof(char));
+	strcat(s_response, s_content);
 	return s_response;
 }
 
@@ -63,4 +67,12 @@ void response_add_header(t_response* response, t_header* header)
 				response->header_size * sizeof(t_header *));
 	}
 	response->headers[response->header_size - 1] = header;
+}
+
+void response_free(t_response* response)
+{
+	free(response->status);
+	free(response->content);
+	header_free_all(response->headers, response->header_size);
+	free(response);
 }

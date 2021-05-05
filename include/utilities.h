@@ -5,5 +5,6 @@
 #include <string.h>
 
 char** strsplit(char* str, const char* delim);
+void   strsplit_free(char** str);
 
 #endif

@@ -30,6 +30,7 @@ void page_print(t_page* page)
 {
 	char* src = page_read(page);
 	printf("%s", src);
+	free(src);
 }
 
 char* page_read(t_page* page)
@@ -37,7 +38,6 @@ char* page_read(t_page* page)
 	FILE* fp;
 	char* line = NULL;
 	size_t len = 0;
-	size_t read;
 
 	fp = fopen(page->path, "r");
 	if (fp == NULL) {
@@ -48,7 +48,7 @@ char* page_read(t_page* page)
 	char* buffer = (char *)calloc(1, sizeof(char));
 	buffer[0] = '\0';
 
-	while ((read = getline(&line, &len, fp)) != -1) {
+	while ((getline(&line, &len, fp)) != -1) {
 		buffer = (char *)realloc(buffer,
 				(strlen(buffer) + strlen(line) + 1) * sizeof(char));
 		strcat(buffer, line);

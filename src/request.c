@@ -19,6 +19,7 @@ t_request* request_parse(char* src)
 		t_header* header = header_parse(s_src[i]);
 		request_add_header(request, header);
 	}
+	strsplit_free(s_src);
 	return request;
 }
 
@@ -32,7 +33,7 @@ void request_free(t_request* request)
 void request_add_header(t_request* request, t_header* header)
 {
 	request->header_size += 1;
-	if (request->header_size == 0) {
+	if (request->header_size == 1) {
 		request->headers = (t_header **)calloc(request->header_size, 
 				sizeof(t_header *));
 	} else {

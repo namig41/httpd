@@ -6,20 +6,26 @@ char** strsplit(char* str, const char* delim)
     char*  part = NULL;
     int i = 0;
 
-    char* aux = strdup(str);
-
-    part = strdup(strtok(aux, delim));
-
+    part = strtok(str, delim);
     while (part) {
-        res = (char**)realloc(res, (i + 1) * sizeof(char*));
-        *(res + i) = strdup(part);
-
+	    if (i == 0) {
+		    res = (char **)calloc(1, sizeof(char *));
+	    } else {
+		    res = (char **)realloc(res, (i + 1) * sizeof(char *));
+	    }
+	    *(res + i) = strdup(part);
         part = strtok(NULL, delim);
         i++;
     }
-
-    res = (char **)realloc(res, i * sizeof(char *));
+    res = (char **)realloc(res, (i + 1) * sizeof(char *));
     *(res + i) = NULL;
-
     return res;
+}
+
+void   strsplit_free(char** str)
+{
+	for (int i = 0; str[i]; i++) {
+		free(str[i]);
+	}
+	free(str);
 }

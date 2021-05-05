@@ -71,6 +71,7 @@ void			response_add_header(t_response* response, t_header* header);
 void			response_set_content(t_response* response, char* src);
 void			response_init_status(t_response* response);
 char*			response_to_string(t_response* response);
+void            response_free(t_response* response);
 
 #endif
 

@@ -7,6 +7,7 @@
 #include <string.h>  
 #include <dirent.h>
 #include <errno.h>
+#include <ctype.h>
 
 #include "net.h"
 #include "message.h"
@@ -14,21 +15,20 @@
 
 #define BUF_SIZE 1028
 
-
 typedef struct	s_http 
 {
 	char*		host;
 	char*		root_dir;
-	t_request	request;
 	t_page**	pages;
 	size_t		page_size;
 }				t_http;
 
 t_http*			http_init(char* root_dir, char* address);
 void			http_free(t_http* http);
-void			http_handle(t_http* http, char* path);
 void			http_server_run(t_http* http);
-int8_t			http_listen(t_http* http);
+
+_Noreturn void            http_listen(t_http* http);
+
 t_page*			http_search_page(t_http* http, char* file_name);
 
 char*			http_read_page(char* file_name);
@@ -36,6 +36,5 @@ void			http_add_page(t_http* http, t_page* page);
 void			http_print_dir(t_http* http);
 void   			http_read_dir(t_http* http);
 void			http_read_dir_r(t_http* http, char *path);
-
 
 #endif

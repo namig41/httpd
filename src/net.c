@@ -119,4 +119,3 @@ int net_recv(int conn, char* buff, size_t size)
 }
 
 #endif /* defined(__linux__) || defined(__WIN32) */
-

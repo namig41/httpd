@@ -3,8 +3,8 @@
 t_header* header_init(char* key, char* value)
 {
 	t_header* header = (t_header *) calloc(1, sizeof(t_header));
-	header->key = key;
-	header->value = value;
+	header->key = strdup(key);
+	header->value = strdup(value);
 	return header;
 }
 
@@ -12,6 +12,7 @@ t_header* header_parse(char* line)
 {
 	char** s_line = strsplit(line, ":");
 	t_header* header = header_init(s_line[0], s_line[1] + 1);
+	strsplit_free(s_line);
 	return header;
 }
 
@@ -36,15 +37,14 @@ char* header_to_string(t_header* header) {
 char* header_to_string_all(t_header** headers, size_t header_size)
 {
 	char* s_headers = (char *)calloc(1, sizeof(char));
-
 	for (size_t i = 0; i < header_size; i++) {
 		char* s_header = header_to_string(headers[i]);
 		s_headers = (char *)realloc(s_headers,
-				(strlen(s_headers) + strlen(s_header)) * sizeof(char));
+				(strlen(s_headers) + strlen(s_header) + 1) * sizeof(char));
 		strcat(s_headers, s_header);
 	}
 	s_headers = (char *)realloc(s_headers,
-			(strlen(s_headers) + 2) * sizeof(char));
+			(strlen(s_headers) + 3) * sizeof(char));
 	strcat(s_headers, "\n\r");
 	return s_headers;
 }
